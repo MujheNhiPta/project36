@@ -25,6 +25,13 @@ Team Name: Mujhe nhi pta
 2) Kamal Rathore
 3) Udit Prabhakar
 
+# Demo video link:
+https://drive.google.com/file/d/1_1SbZCo8Z_7k5xqpp3ulQiNWpx11PHBo/view?usp=drivesdk
+
+# Powerpoint presentation:
+[MessManagement_Mujhenhipta.pptx](https://github.com/MujheNhiPta/project36/files/6290891/MessManagement_Mujhenhipta.pptx)
+
+
 # Made at:
 
 ![Made-at-Hack-36](https://user-images.githubusercontent.com/65244059/114281084-f2ba6200-9a59-11eb-803b-73ec5eba2ef0.png)
