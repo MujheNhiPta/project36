@@ -132,15 +132,14 @@ public class loginClass implements Runnable{
                                     break;
                                 switch (temp1){
                                     case "1":   //for profile Student
-                                        //proStud(rs);
+                                        proStud(rs);
                                         break;
                                     case "2":   //for booking status
+                                        requestDealer(rs);
                                         break;
                                 }
-
                             }
                         }
-
                     } catch (Exception e6) {
                         try {
                             dos.writeUTF("0");// Either username or password wrong OR no user with this info
@@ -188,7 +187,6 @@ public class loginClass implements Runnable{
                                     case "6"://New Reg Student
                                         try{studList(rs);}
                                         catch(Exception e){e.printStackTrace();}
-                                        //reStud();
                                         break;
                                     case "7"://Mess Structure
                                         mesStruct(rs);
@@ -213,6 +211,8 @@ public class loginClass implements Runnable{
             }
         }
     }
+
+    //student profile
     void proStud(ResultSet rs)throws IOException,SQLException{
         dos.writeUTF(rs.getString(1)+"$"+rs.getString(2)+"$"+rs.getString(3)+"$"+rs.getString(4)+"$"+rs.getString(5)+"$"+rs.getString(6)+"$"+rs.getString(7));
         dos.flush();
@@ -231,6 +231,8 @@ public class loginClass implements Runnable{
                 break;
         }
     }
+
+    //student booking status handler
     void requestDealer(ResultSet rs)throws IOException,SQLException{
         String q= "Select * from messaccounts.manager_accounts where hostelName= '"+rs.getString(3)+"'";
         ResultSet r= f_main.con.createStatement().executeQuery(q);
@@ -267,7 +269,7 @@ public class loginClass implements Runnable{
                 dos.flush();
             }
             else{
-                int seatNum = (Integer.parseInt(r.getString(5)) * Integer.parseInt(r.getString(6)) - seatAvail) * 2; //50 to be replaced by total
+                int seatNum = (Integer.parseInt(r.getString(5)) * Integer.parseInt(r.getString(6)) - seatAvail) * 2;
                 if (Integer.parseInt(temp) % 2 == 1)
                     seatNum += 1;
                 else
@@ -282,6 +284,38 @@ public class loginClass implements Runnable{
                 dos.flush();
             }
             dis.readUTF();
+        }
+    }
+
+    //to check in student by admin
+    void checkIn(ResultSet rs){
+        try{
+            String temp1= dis.readUTF(); //1->checkin kro 0->cut page
+            if(temp1.equals("1")){
+                temp1= dis.readUTF(); //reg reading
+//                String query= "select * from slot."+rs.getString(3)+" where reg= '"+temp1+"'";
+//                ResultSet rc= f_main.conSlot.createStatement().executeQuery(query);
+//
+                String query= "UPDATE `slots`.`"+rs.getString(3)+"` SET `checkin` = '1' WHERE (`reg` = '"+temp1+"')";
+                f_main.conSlot.createStatement().executeUpdate(query);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    void checkOut(ResultSet rs){
+        try{
+            String temp1= dis.readUTF(); //1->checkin kro 0->cut page
+            if(temp1.equals("1")){
+                temp1= dis.readUTF(); //reg reading
+                String query= "UPDATE `slots`.`"+rs.getString(3)+"` SET `checkout` = '1' WHERE (`reg` = '"+temp1+"')";
+                f_main.conSlot.createStatement().executeUpdate(query);
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -440,33 +474,8 @@ public class loginClass implements Runnable{
         }
     }
 
-    void checkOut(ResultSet rs){
-        try{
-            String temp1= dis.readUTF(); //1->checkin kro 0->cut page
-            if(temp1.equals("1")){
-                temp1= dis.readUTF(); //reg reading
-                String query= "UPDATE `slots`.`"+rs.getString(3)+"` SET `checkout` = '1' WHERE (`reg` = '"+temp1+"')";
-                f_main.conSlot.createStatement().executeUpdate(query);
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
 
-    void checkIn(ResultSet rs){
-        try{
-            String temp1= dis.readUTF(); //1->checkin kro 0->cut page
-            if(temp1.equals("1")){
-                temp1= dis.readUTF(); //reg reading
-                String query= "UPDATE `slots`.`"+rs.getString(3)+"` SET `checkin` = '1' WHERE (`reg` = '"+temp1+"')";
-                f_main.conSlot.createStatement().executeUpdate(query);
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
-    }
+
 
     void mesStruct(ResultSet rs){
         String str= null;

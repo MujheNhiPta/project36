@@ -136,6 +136,7 @@ public class studentProfile{
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
+                frame2.setVisible(true);
             }
         });
         JLabel l1= new JLabel("Enter new Password");
