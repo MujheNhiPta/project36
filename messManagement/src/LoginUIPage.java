@@ -106,15 +106,15 @@ public class LoginUIPage {
         lHName.setVisible(false);
 
         JTextField tName = new JTextField("");
-        tName.setBounds(100, 125, 150, 20);
+        tName.setBounds(100, 125, 150, 30);
         loginFrame.add(tName);
 
         JTextField tPass = new JTextField("");
-        tPass.setBounds(100, 175, 150, 20);
+        tPass.setBounds(100, 175, 150, 30);
         loginFrame.add(tPass);
 
         JTextField tHName = new JTextField("");
-        tHName.setBounds(100, 95, 150, 20);
+        tHName.setBounds(100, 95, 150, 30);
         loginFrame.add(tHName);
         tHName.setVisible(false);
 
@@ -123,7 +123,7 @@ public class LoginUIPage {
         loginFrame.add(status);
 
         JButton signUP = new JButton("SignUP");
-        signUP.setBounds(130, 270, 80, 20);
+        signUP.setBounds(130, 270, 80, 25);
         loginFrame.add(signUP);
         signUP.addActionListener(new ActionListener() {
             @Override
@@ -161,7 +161,7 @@ public class LoginUIPage {
         });
 
         JButton signIn = new JButton("SignIN");
-        signIn.setBounds(130, 230, 80, 20);
+        signIn.setBounds(130, 230, 80, 25);
         loginFrame.add(signIn);
         signIn.addActionListener(new ActionListener() {
             @Override

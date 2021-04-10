@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import java.util.StringTokenizer;
 
 public class loginClass implements Runnable{
@@ -77,6 +75,7 @@ public class loginClass implements Runnable{
                             f_main.con.prepareStatement(query).execute(query);
                             dos.writeUTF("2");//Account created Successfully
                             dos.flush();
+                            demoData();
                         } catch (Exception t) {
                             t.printStackTrace();
                         }
@@ -216,17 +215,11 @@ public class loginClass implements Runnable{
     void status(ResultSet rs)throws IOException,SQLException{
         int rows=Integer.parseInt(rs.getString(5));
         int cols=Integer.parseInt(rs.getString(6));
-        StringTokenizer st_Token = new StringTokenizer(rs.getString(7), "$");
-        LocalTime lt= LocalTime.now();
-        LocalTime lt1= LocalTime.of(Integer.parseInt(st_Token.nextToken()),Integer.parseInt(st_Token.nextToken()),0);
-        long min= ChronoUnit.MINUTES.between(lt,lt1);
-        Math.ceil((double)min/)
-
-        int presentSlot= 1;
+        int presentSlot=1;
         dos.writeUTF(rows+"$"+cols+"$"+presentSlot);
         dos.flush();
 
-        String temp = "select * from slots." + rs.getString(3) + " where slot = '"+ presentSlot + "'";// and checkin = '1' and checkout= '1'";
+        String temp = "select * from slots." + rs.getString(3) + " where slot = '"+ presentSlot + "'";
         ResultSet rf = f_main.conStud.createStatement().executeQuery(temp);
         while (rf.next()){
             String t1=rf.getString(1);
@@ -240,33 +233,62 @@ public class loginClass implements Runnable{
         dos.writeUTF("0");
         dos.flush();
 
-        String temp1= dis.readUTF(); //reg
-        if(!temp1.equals("0")) {
-            String temp2 = "select * from student." + rs.getString(3) + " where reg= '" + temp1 + "'";
-            ResultSet rc = f_main.conStud.createStatement().executeQuery(temp2);
-            rc.next();
-            dos.writeUTF(rc.getString(1) + "$" + rc.getString(3) + "$" + rc.getString(4) + "$" + rc.getString(5) + "$" + rc.getString(6));
-            dos.flush();
+        String temp1="";
+        while(true) {
+            temp1 = dis.readUTF(); //reg
+//            System.out.println(temp1);
+            if (temp1.equals("0")){
+                break;
+            }
+            else{
+                String temp2 = "select * from student." + rs.getString(3) + " where reg= '" + temp1 + "'";
+                ResultSet rc = f_main.conStud.createStatement().executeQuery(temp2);
+                rc.next();
+                dos.writeUTF(rc.getString(1) + "$" + rc.getString(3) + "$" + rc.getString(4) + "$" + rc.getString(5) + "$" + rc.getString(6));
+                dos.flush();
+            }
         }
     }
 
     void allotment(ResultSet rs)throws IOException, SQLException{
-        String flag= dis.readUTF();
-        if(flag.equals("0"))
-            return;
+        String flag= "";
         int r= Integer.parseInt(rs.getString(5));
         int c= Integer.parseInt(rs.getString(6));
         int s= Integer.parseInt(rs.getString(10));
         String p= Integer.toString(r*c);
         String query;
-        for(int i= 1;i<=s;i++) {
-            query = "INSERT INTO `vacant`.`" + rs.getString(3) + "` (`slotNo`, `Vacant`) VALUES ('" + i + "', '" + p + "')";
-            f_main.conVacant.createStatement().executeUpdate(query);
+
+
+        String q= "select * from slots."+rs.getString(3);
+        ResultSet f= f_main.conStud.createStatement().executeQuery(q);
+        while(f.next()){
+            dos.writeUTF(f.getString(1) +"$" +f.getString(2)+"$" +f.getString(3));
+            dos.flush();
         }
-        giveSlot(rs,r,c);
+        dos.writeUTF("0");
+        dos.flush();
+
+        while(true) {
+            flag= dis.readUTF();
+            if(flag.equals("0"))
+                break;
+            else if (flag.equals("1")) {
+                giveSlot(rs, r, c);
+            }
+            else if (flag.equals("2")) {
+                String temp1 = dis.readUTF(); // reg
+                String temp2 = "select * from slots." + rs.getString(3) + " where reg = '" + temp1 + "'";
+                ResultSet rc = f_main.conStud.createStatement().executeQuery(temp2);
+                rc.next();
+                dos.writeUTF(rc.getString(2) + "$" + rc.getString(3));
+                dos.flush();
+//                dos.writeUTF("0");
+//                dos.flush();
+            }
+        }
     }
 
-    void giveSlot(ResultSet rc, int r, int c) throws SQLException {
+    void giveSlot(ResultSet rc, int r, int c) throws SQLException,IOException {
         ResultSet rr;
         String hos= rc.getString(3);
         String sql = "SELECT * FROM vacant." + hos;
@@ -451,6 +473,19 @@ public class loginClass implements Runnable{
                 }
                 e.printStackTrace();
             }
+        }
+    }
+
+    void demoData() throws SQLException{
+        String[] str={"Kamal Rathore","Udit Prabhakar","Ritik Srivastava","Udayan Shukla","Palash Mitthal","Gaurav Kumar","Divyansh Asthana","Ayush Aman"};
+        int n=8,reg=4001;
+        for(int i=0;i<150;i++) {
+            String temp1,name= str[reg%n];
+            temp1 = "INSERT INTO `student`.`svbh`(`Name`, `reg`, `hostelName`, `roomNo`, `mobNo`, `email`, `pass`) VALUES('" + name +"', '"+reg+"', 'svbh', '"+i+100+"', '1234567869', '"+name+"@mnnit.ac.in"+"', 'private')";
+            f_main.conStud.prepareStatement(temp1).execute(temp1);
+            temp1 = "INSERT INTO `slots`.`svbh` (`reg`, `slot`, `seat`, `checkin`, `checkout`) VALUES ('"+reg+"', '0', '0', '0', '0')";
+            f_main.conSlot.prepareStatement(temp1).execute(temp1);
+            reg++;
         }
     }
     public loginClass(Socket s){
