@@ -104,7 +104,7 @@ public class loginClass implements Runnable{
                     temp3 = dis.readUTF();// password
                     temp1= dis.readUTF();//0->admin or 1->student
                     if(temp1.equals("1")){
-                        str= dis.readUTF();
+                        str= dis.readUTF();// hostel
                     }
                 } catch (IOException e11) {
                     e11.printStackTrace();
@@ -146,7 +146,7 @@ public class loginClass implements Runnable{
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        //e6.printStackTrace();
+                        e6.printStackTrace();
                     }
                 }
                 //means admin
