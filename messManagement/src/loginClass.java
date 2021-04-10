@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.StringTokenizer;
 
 public class loginClass implements Runnable{
@@ -209,6 +211,77 @@ public class loginClass implements Runnable{
                 }
                 break;
             }
+        }
+    }
+    void proStud(ResultSet rs)throws IOException,SQLException{
+        dos.writeUTF(rs.getString(1)+"$"+rs.getString(2)+"$"+rs.getString(3)+"$"+rs.getString(4)+"$"+rs.getString(5)+"$"+rs.getString(6)+"$"+rs.getString(7));
+        dos.flush();
+        while(true){
+            String s= dis.readUTF();    //1->change pass 0-> cut page
+            if(s.equals("1")){
+                s= dis.readUTF();       //1->set 0->cutPage
+                if(s.equals("1"))       //set dabaya
+                {
+                    s= dis.readUTF();
+                    String q= "UPDATE `student`.`"+rs.getString(3)+"` SET `pass` = '"+s+"' WHERE (`reg` = '"+rs.getString(2)+"')";
+                    f_main.conStud.createStatement().executeUpdate(q);
+                }
+            }
+            else
+                break;
+        }
+    }
+    void requestDealer(ResultSet rs)throws IOException,SQLException{
+        String q= "Select * from messaccounts.manager_accounts where hostelName= '"+rs.getString(3)+"'";
+        ResultSet r= f_main.con.createStatement().executeQuery(q);
+        r.next();
+        dos.writeUTF(r.getString(10));       //number of slots from manager_account
+        dos.flush();
+
+        q= "select slot,seat from slots."+rs.getString(3)+" where reg= "+rs.getString(2);
+        ResultSet rq= f_main.conSlot.createStatement().executeQuery(q);
+        rq.next();
+        dos.writeUTF(rq.getString(1)+"$"+rq.getString(2));      //slot+seat
+        dos.flush();
+
+        q= r.getString(7);
+        StringTokenizer st= new StringTokenizer(q, "$");
+        int str[]= {Integer.parseInt(st.nextToken()),Integer.parseInt(st.nextToken()),Integer.parseInt(st.nextToken())};
+        if(str[2]== 1)
+            str[0]+= 12;
+        LocalTime lt= LocalTime.now();      //userTime
+        LocalTime lt1= LocalTime.of(str[0],str[1],0);  //mess time
+        long min= ChronoUnit.MINUTES.between(lt1,lt);//lt- lt1
+        dos.writeUTF(min+"");               //minute
+        dos.flush();
+
+        String temp= dis.readUTF();     //0->page cut 1-> request
+        if(!temp.equals("0")){
+            temp= dis.readUTF();        //slot number
+            String sql = "SELECT * FROM vacant." + rs.getString(3)+ " where slotNo= '"+temp+"'";
+            ResultSet cc= f_main.conVacant.createStatement().executeQuery(sql);
+            cc.next();
+            int seatAvail= Integer.parseInt(cc.getString(2));
+            if(seatAvail== 0){
+                dos.writeUTF("00$00");
+                dos.flush();
+            }
+            else{
+                int seatNum = (Integer.parseInt(r.getString(5)) * Integer.parseInt(r.getString(6)) - seatAvail) * 2; //50 to be replaced by total
+                if (Integer.parseInt(temp) % 2 == 1)
+                    seatNum += 1;
+                else
+                    seatNum += 2;
+                sql = "UPDATE `slots`.`" + rs.getString(3) + "` SET `slot` = '" + temp + "', `seat` = '" + seatNum + "' WHERE (`reg` = '" + rs.getString(2) + "')";
+                f_main.conSlot.createStatement().executeUpdate(sql);
+                seatAvail= seatAvail -1;
+                sql= "UPDATE `vacant`.`"+rs.getString(3)+"` SET `Vacant` = '"+seatAvail+"' WHERE (`slotNo` = '"+temp+"')";
+                f_main.conVacant.createStatement().executeUpdate(sql);
+                System.out.println(seatNum);
+                dos.writeUTF(seatNum+"$"+1);
+                dos.flush();
+            }
+            dis.readUTF();
         }
     }
 
