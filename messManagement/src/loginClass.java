@@ -65,12 +65,6 @@ public class loginClass implements Runnable{
                             exception.printStackTrace();
                         }
 
-                        query= "CREATE TABLE `vacant`.`"+temp1+"` (`slotNo` VARCHAR(20) NOT NULL,`Vacant` VARCHAR(20) NOT NULL, UNIQUE INDEX `slotNo_UNIQUE` (`slotNo` ASC))";
-                        try {
-                            f_main.conVacant.createStatement().execute(query);
-                        } catch (SQLException exception) {
-                            exception.printStackTrace();
-                        }
 
                         query = "INSERT INTO manager_accounts VALUES (" + "'" + temp2 + "'" + "," + "'" + temp3 + "'" + "," + "'" + temp1 + "'" + "," + "'" + temp1 + "'"+ ",'0','0','0$0$0','0','0','0','0','0'"+")";
                         try {
@@ -163,13 +157,14 @@ public class loginClass implements Runnable{
                         else{
                             dos.writeUTF("1");// successfully loggedIN
                             dos.flush();
+                            int i= 0;
                             while(true){
                                 temp1= dis.readUTF();
                                 if(temp1.equals("0")) //page cut
                                     break;
                                 switch(temp1){
                                     case "1"://profile
-                                        //proAd();
+                                        i= proAd(rs);
                                         break;
                                     case "2"://checkIn
                                         checkIn(rs);
@@ -192,6 +187,8 @@ public class loginClass implements Runnable{
                                         mesStruct(rs);
                                         break;
                                 }
+                                if(i== 1)
+                                    break;
                             }
                         }
                     } catch (Exception e6) {
@@ -210,6 +207,38 @@ public class loginClass implements Runnable{
                 break;
             }
         }
+    }
+
+    int proAd(ResultSet rs) throws IOException,SQLException{
+        dos.writeUTF(rs.getString(1)+"$"+rs.getString(2)+"$"+rs.getString(3));
+        dos.flush();
+        while(true){
+            String s= dis.readUTF();    //1->change pass 0-> cut page 2->delete account
+            if(s.equals("1")){
+                s= dis.readUTF();       //1->set 0->cutPage
+                if(s.equals("1"))       //set dabaya
+                {
+                    s= dis.readUTF();
+                    String q= "UPDATE `messaccounts`.`manager_accounts` SET `password` = '"+s+"' WHERE (`userName` = '"+rs.getString(1)+"')";
+                    f_main.con.createStatement().executeUpdate(q);
+                }
+            }
+            else if(s.equals("2"))  //delete dabaya
+            {
+                String q= "Drop Table IF EXISTS student."+rs.getString(3);
+                f_main.conStud.createStatement().execute(q);
+                q= "Drop Table IF EXISTS slots."+rs.getString(3);
+                f_main.conSlot.createStatement().execute(q);
+                q= "Drop Table IF EXISTS vacant."+rs.getString(3);
+                f_main.conVacant.createStatement().execute(q);
+                q= "DELETE FROM `messaccounts`.`manager_accounts` WHERE (`userName` = '"+rs.getString(1)+"')";
+                f_main.con.createStatement().execute(q);
+                return 1;
+            }
+            else
+                break;
+        }
+        return 0;
     }
 
     //student profile
@@ -288,41 +317,71 @@ public class loginClass implements Runnable{
     }
 
     //to check in student by admin
-    void checkIn(ResultSet rs){
-        try{
-            String temp1= dis.readUTF(); //1->checkin kro 0->cut page
-            if(temp1.equals("1")){
-                temp1= dis.readUTF(); //reg reading
-//                String query= "select * from slot."+rs.getString(3)+" where reg= '"+temp1+"'";
-//                ResultSet rc= f_main.conSlot.createStatement().executeQuery(query);
-//
-                String query= "UPDATE `slots`.`"+rs.getString(3)+"` SET `checkin` = '1' WHERE (`reg` = '"+temp1+"')";
-                f_main.conSlot.createStatement().executeUpdate(query);
+    void checkIn(ResultSet rs) {
+        while(true){
+            try {
+                String temp1 = dis.readUTF(); //1->checkin kro 0->cut page
+                if (temp1.equals("1")) {
+                    temp1 = dis.readUTF(); //reg reading
+                    StringTokenizer st = new StringTokenizer(rs.getString(7), "$");
+                    int str[] = {Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken())};
+                    if (str[2] == 1)
+                        str[0] += 12;
+                    LocalTime lt = LocalTime.now();      //userTime
+                    LocalTime lt1 = LocalTime.of(str[0], str[1], 0);  //mess time
+                    long min = ChronoUnit.MINUTES.between(lt1, lt);
+                    //System.out.println(lt+" "+lt1+ " "+min);
+                    if (min >= -30) {
+                        String query = "UPDATE `slots`.`" + rs.getString(3) + "` SET `checkin` = '1' WHERE (`reg` = '" + temp1 + "')";
+                        f_main.conSlot.createStatement().executeUpdate(query);
+                        dos.writeUTF("1"); //successful checkedIN
+                    } else
+                        dos.writeUTF("0");  //can not checkIn write now
+                    dos.flush();
+                } else
+                    break;
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }
-        catch(Exception e){
-            e.printStackTrace();
         }
     }
 
-    void checkOut(ResultSet rs){
-        try{
-            String temp1= dis.readUTF(); //1->checkin kro 0->cut page
-            if(temp1.equals("1")){
-                temp1= dis.readUTF(); //reg reading
-                String query= "UPDATE `slots`.`"+rs.getString(3)+"` SET `checkout` = '1' WHERE (`reg` = '"+temp1+"')";
-                f_main.conSlot.createStatement().executeUpdate(query);
-            }
-        }
-        catch(Exception e){
-            e.printStackTrace();
+    void checkOut(ResultSet rs) {
+        while(true){
+             try {
+                String temp1 = dis.readUTF(); //1->checkin kro 0->cut page
+                if (temp1.equals("1")) {
+                    temp1 = dis.readUTF(); //reg reading
+                    String query = "select * from slots." + rs.getString(3) + " where reg= '" + temp1 + "'";
+                    ResultSet rc = f_main.conSlot.createStatement().executeQuery(query);
+                    rc.next();
+                    if (rc.getString(4).equals("1")) {
+                        query = "UPDATE `slots`.`" + rs.getString(3) + "` SET `checkout` = '1' WHERE (`reg` = '" + temp1 + "')";
+                        f_main.conSlot.createStatement().executeUpdate(query);
+                        dos.writeUTF("1");
+                    } else
+                        dos.writeUTF("0");
+                    dos.flush();
+                } else
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+             }
         }
     }
 
     void status(ResultSet rs)throws IOException,SQLException{
         int rows=Integer.parseInt(rs.getString(5));
         int cols=Integer.parseInt(rs.getString(6));
-        int presentSlot=1;
+        StringTokenizer st= new StringTokenizer(rs.getString(7), "$");
+        int str[]= {Integer.parseInt(st.nextToken()),Integer.parseInt(st.nextToken()),Integer.parseInt(st.nextToken())};
+        if(str[2]== 1)
+            str[0]+= 12;
+        LocalTime lt= LocalTime.now();      //userTime
+        LocalTime lt1= LocalTime.of(str[0],str[1],0);  //mess time
+        long min= ChronoUnit.MINUTES.between(lt1,lt);
+        int presentSlot= (int)Math.ceil((double)min/(Integer.parseInt(rs.getString(9))+ Integer.parseInt(rs.getString(11))));
+
         dos.writeUTF(rows+"$"+cols+"$"+presentSlot);
         dos.flush();
 
@@ -361,10 +420,6 @@ public class loginClass implements Runnable{
         String flag= "";
         int r= Integer.parseInt(rs.getString(5));
         int c= Integer.parseInt(rs.getString(6));
-        int s= Integer.parseInt(rs.getString(10));
-        String p= Integer.toString(r*c);
-        String query;
-
 
         String q= "select * from slots."+rs.getString(3);
         ResultSet f= f_main.conStud.createStatement().executeQuery(q);
@@ -381,6 +436,8 @@ public class loginClass implements Runnable{
                 break;
             else if (flag.equals("1")) {
                 giveSlot(rs, r, c);
+                dos.writeUTF("1");
+                dos.flush();
             }
             else if (flag.equals("2")) {
                 String temp1 = dis.readUTF(); // reg
@@ -389,13 +446,11 @@ public class loginClass implements Runnable{
                 rc.next();
                 dos.writeUTF(rc.getString(2) + "$" + rc.getString(3));
                 dos.flush();
-//                dos.writeUTF("0");
-//                dos.flush();
             }
         }
     }
 
-    void giveSlot(ResultSet rc, int r, int c) throws SQLException,IOException {
+    void giveSlot(ResultSet rc, int r, int c) throws SQLException{
         ResultSet rr;
         String hos= rc.getString(3);
         String sql = "SELECT * FROM vacant." + hos;
@@ -475,11 +530,11 @@ public class loginClass implements Runnable{
     }
 
 
-
-
     void mesStruct(ResultSet rs){
         String str= null;
+        String hos="";
         try{
+            hos= rs.getString(3);
             ResultSet rs1= null;
             str= "SELECT * FROM manager_accounts WHERE userName= '"+rs.getString(1)+"'"+" AND password= '"+rs.getString(2)+ "'";
             //System.out.println("kamal2");
@@ -502,8 +557,11 @@ public class loginClass implements Runnable{
                 if(str.equals("1")){ //set
                     str= dis.readUTF();
                     StringTokenizer st_Token = new StringTokenizer(str, "#");
-                    str= "UPDATE `messaccounts`.`manager_accounts` SET `rows` = '"+ st_Token.nextToken()+"', `cols` = '"+st_Token.nextToken()+"', `messTime` = '"+st_Token.nextToken()+"', `messtotTime` = '"+st_Token.nextToken()+"', `gap` = '"+ st_Token.nextToken()+"', `totSlots` ='"+st_Token.nextToken()+"', `timeForSlot` ='"+st_Token.nextToken()+"', `totStud` ='"+st_Token.nextToken()+"' WHERE (`userName` = '"+ rs.getString(1)+"')";
+                    String st[]={st_Token.nextToken(),st_Token.nextToken(),st_Token.nextToken(),st_Token.nextToken(),st_Token.nextToken(),st_Token.nextToken(),st_Token.nextToken(),st_Token.nextToken()};
+                    str= "UPDATE `messaccounts`.`manager_accounts` SET `rows` = '"+ st[0]+"', `cols` = '"+st[1]+"', `messTime` = '"+st[2]+"', `messtotTime` = '"+st[3]+"', `gap` = '"+ st[4]+"', `totSlots` ='"+st[5]+"', `timeForSlot` ='"+st[6]+"', `totStud` ='"+st[7]+"' WHERE (`userName` = '"+ rs.getString(1)+"')";
                     f_main.con.prepareStatement(str).executeUpdate(str);
+
+                    toCreateNewVacantTable(hos,st[0],st[1],st[5]);
                     dos.writeUTF("1");
                     dos.flush();
                 }
@@ -521,11 +579,35 @@ public class loginClass implements Runnable{
                 e.printStackTrace();
             }
         }
-//        try {
-//            rs1.close();
-//        } catch (SQLException exception) {
-//            exception.printStackTrace();
-//        }
+    }
+
+    void toCreateNewVacantTable(String hos, String s1,String s2, String s3) throws SQLException{
+        String query= "Drop Table IF EXISTS vacant."+hos;
+        f_main.conVacant.createStatement().execute(query);
+
+        query= "select * from slots."+hos;
+        ResultSet ref= f_main.conSlot.createStatement().executeQuery(query);
+        while(ref.next()){
+            query= "UPDATE `slots`.`"+hos+"` SET `slot` = '0', `seat` = '0', `checkin` = '0', `checkout` = '0' WHERE (`reg` = '"+ref.getString(1)+"')";
+            f_main.conSlot.createStatement().executeUpdate(query);
+        }
+
+        query= "CREATE TABLE `vacant`.`"+hos+"` (`slotNo` VARCHAR(20) NOT NULL,`Vacant` VARCHAR(20) NOT NULL, UNIQUE INDEX `slotNo_UNIQUE` (`slotNo` ASC))";
+        try {
+            f_main.conVacant.createStatement().execute(query);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
+
+        int r= Integer.parseInt(s1);
+        int c= Integer.parseInt(s2);
+        int s= Integer.parseInt(s3);
+        String p= Integer.toString(r*c);
+        for(int i= 1;i<=s;i++) {
+            query = "INSERT INTO `vacant`.`" + hos + "` (`slotNo`, `Vacant`) VALUES ('" + i + "', '" + p + "')";
+            f_main.conVacant.createStatement().executeUpdate(query);
+        }
+
     }
 
     void reStud() {

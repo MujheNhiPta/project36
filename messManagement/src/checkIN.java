@@ -106,19 +106,27 @@ public class checkIN {
         in.setBounds(150,225,100,35);
         panel.add(in);
 
+        JLabel l= new JLabel("");
+        l.setBounds(75, 270, 300, 40);
+        l.setFont(new Font("Serif",Font.PLAIN, 17));
+        panel.add(l);
         in.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                l.setText("");
                 try {
                     dos.writeUTF("1"); // check in Button dabaya h
                     dos.flush();
                     dos.writeUTF(tf.getText());
                     dos.flush();
+                    String st= dis.readUTF();
+                    if(st.equals("1"))
+                        l.setText("CheckIn successfully");
+                    else
+                        l.setText("Can Not checkIn Now");
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
                 }
-                frame.dispose();
-                preF.setVisible(true);
             }
         });
         frame.setVisible(true);

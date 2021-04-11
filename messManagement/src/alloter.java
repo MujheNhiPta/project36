@@ -88,20 +88,23 @@ public class alloter {
             newTokens.setFont(new Font("Serif", Font.PLAIN, 25));
             panel.add(newTokens);
 
-
-
+            JLabel l= new JLabel("");
+            l.setBounds(320, 10, 100, 30);
+            panel.add(l);
 
             newTokens.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    l.setText("Generating...");
                     try {
                         dos.writeUTF("1");  //1-> new student
                         dos.flush();
+                        String s= dis.readUTF();
+                        if(s.equals("1"))
+                            l.setText("Generated");
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
-//                    new regStudent(frame, dis, dos, addr());
-//                    frame.setVisible(false);
                 }
             });
 

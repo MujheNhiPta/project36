@@ -99,7 +99,7 @@ public class messStructure {
         frame.add(totStudEntry);
 
         JLabel status= new JLabel("");
-        status.setBounds(40, 380, 250, 30);
+        status.setBounds(40, 390, 250, 30);
         frame.add(status);
 
         JButton show= new JButton("Show");

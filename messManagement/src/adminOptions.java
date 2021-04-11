@@ -41,7 +41,14 @@ public class adminOptions {
         b1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                try {
+                    dos.writeUTF("1");
+                    dos.flush();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+                opFrame.setVisible(false);
+                new adminPro(preF,opFrame, dis, dos);
             }
         });
 
