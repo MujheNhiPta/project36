@@ -1,10 +1,13 @@
 package client;
 
-import client.admin.adminOptions;
-import client.student.studentOptions;
+import client.admin.*;
+import client.student.*;
 
 import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
