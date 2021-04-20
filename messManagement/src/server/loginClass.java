@@ -382,7 +382,7 @@ public class loginClass implements Runnable{
         LocalTime lt= LocalTime.now();      //userTime
         LocalTime lt1= LocalTime.of(str[0],str[1],0);  //mess time
         long min= ChronoUnit.MINUTES.between(lt1,lt);
-        int presentSlot= (int)Math.ceil((double)min/(Integer.parseInt(rs.getString(9))+ Integer.parseInt(rs.getString(11))));
+        int presentSlot= (int)Math.ceil((double)min/(Integer.parseInt(rs.getString(9))+ Double.parseDouble(rs.getString(11))));
 
         dos.writeUTF(rows+"$"+cols+"$"+presentSlot);
         dos.flush();
