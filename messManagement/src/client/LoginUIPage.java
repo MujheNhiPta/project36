@@ -39,7 +39,7 @@ public class LoginUIPage {
         });
         jf.setSize(300, 200);
         JLabel hName = new JLabel("Hostel Name: ");
-        hName.setBounds(20, 75, 70, 30);
+        hName.setBounds(20, 75, 100, 30);
         jf.add(hName);
         JTextField jtf= new JTextField("");
         jtf.setBounds(100, 80, 150, 20);
@@ -117,7 +117,7 @@ public class LoginUIPage {
         tName.setBounds(100, 125, 150, 30);
         loginFrame.add(tName);
 
-        JTextField tPass = new JTextField("");
+        JPasswordField tPass = new JPasswordField("");
         tPass.setBounds(100, 175, 150, 30);
         loginFrame.add(tPass);
 
