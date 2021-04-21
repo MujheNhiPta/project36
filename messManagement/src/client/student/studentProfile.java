@@ -15,7 +15,7 @@ public class studentProfile{
     JFrame preF,frame2;
     DataInputStream dis;
     DataOutputStream dos;
-    JLabel l7;
+    JLabel l7,status;
     public studentProfile(JFrame preF, DataInputStream dis, DataOutputStream dos){
         this.preF= preF;
         this.dis= dis;
@@ -75,7 +75,7 @@ public class studentProfile{
         change.setFont(new Font("Serif", Font.PLAIN, 20));
         panel2.add(change);
 
-        JLabel status= new JLabel("");
+        status= new JLabel("");
         status.setBounds(110, 450, 200, 30);
         panel2.add(status);
         change.addActionListener(new ActionListener() {
@@ -90,7 +90,6 @@ public class studentProfile{
                 }
                 frame2.setVisible(false);
                 password();
-                status.setText("Password Changed");
             }
         });
         frame2.addWindowListener(new WindowAdapter() {
@@ -163,6 +162,7 @@ public class studentProfile{
                 }
                 l7.setText("Password: "+t.getText());
                 frame1.dispose();
+                status.setText("Password Changed");
                 frame2.setVisible(true);
             }
         });

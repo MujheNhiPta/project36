@@ -15,7 +15,7 @@ public class adminPro {
     JFrame preF, jf,pPreF;
     DataOutputStream dos;
     DataInputStream dis;
-    JLabel l2, stat;
+    JLabel l2, stat, status;
     public adminPro(JFrame pPreF, JFrame preF, DataInputStream dis, DataOutputStream dos,JLabel status){
         this.pPreF= pPreF;
         this.preF= preF;
@@ -41,7 +41,7 @@ public class adminPro {
         l3.setFont(new Font("Serif", Font.BOLD, 24));
         jf.add(l3);
 
-        JLabel status= new JLabel("");
+        status= new JLabel("");
         status.setBounds(95, 275, 200, 30);
         jf.add(status);
 
@@ -62,7 +62,6 @@ public class adminPro {
                 }
                 jf.setVisible(false);
                 password();
-                status.setText("Password changed");
             }
         });
 
@@ -154,6 +153,7 @@ public class adminPro {
                 }
                 l2.setText("Password: "+t.getText());
                 frame1.dispose();
+                status.setText("Password Changed");
                 jf.setVisible(true);
             }
         });
